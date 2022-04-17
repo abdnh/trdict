@@ -14,4 +14,4 @@ Also see my other projects related to Turkish:
 - Use custom html elements to show response data: https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements
 - show sound buttons
 - show compound nouns and expressions
-- a more fancy inteface maybe
+- a more fancy interface maybe
