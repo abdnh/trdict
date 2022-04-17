@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <title>Turkish Dictionary</title>
+    <style>
+        dd,
+        dl,
+        li {
+            margin-left: 0px;
+            padding-left: 0px;
+        }
+
+        dt {
+            color: blue;
+        }
+
+        .trdict-prop {
+            color: orange;
+            font-style: italic;
+        }
+
+        #trdict-entry-list {
+            list-style-type: upper-roman;
+        }
+
+        ol,
+        ul,
+        dd,
+        dt {
+            text-align: left;
+        }
+
+        ol,
+        ul {
+            padding-left: 20px;
+        }
+
+        .trdict-example {
+            font-style: italic;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="GET" action="">
+        <input id="search" name="search" type="search" autofocus>
+        <input type="submit" value="Ara">
+    </form>
+    <output id="output"></output>
+    <script>
+        const outputElement = document.getElementById("output");
+
+        function getSearch() {
+            const location = new URL(window.location);
+            const search = location.searchParams.get("search");
+            console.log(`search=${search}`);
+            return search;
+        }
+
+        function showResponse(response) {
+            if (response.error) {
+                const error = document.createElement('span');
+                error.classList.add("error");
+                error.textContent = response.error;
+                outputElement.appendChild(error);
+                return;
+            }
+            const entries = response;
+            const entryList = document.createElement("ul");
+            entryList.classList.add("trdict-entry-list");
+            for (const entry of entries) {
+                console.log('entry = ', entry);
+                const entryLi = document.createElement("li");
+                const dl = document.createElement("dl");
+                const dt = document.createElement("dt");
+                dt.textContent = entry['madde'];
+                dl.appendChild(dt);
+                const dd = document.createElement("dd");
+                dl.appendChild(dd);
+                const ol = document.createElement("ol");
+                dl.appendChild(ol);
+                const definitionList = entry["anlamlarListe"]
+                for (const definition of definitionList) {
+                    if (!("anlam" in definition) || !definition["anlam"]) {
+                        continue
+                    }
+                    const definitionLi = document.createElement("li");
+                    const definitionText = definition["anlam"];
+
+                    if (definition["ozelliklerListe"]) {
+                        const properties = definition["ozelliklerListe"]
+                        const propsElement = document.createElement("span");
+                        propsElement.classList.add("trdict-prop");
+                        for (const [i, prop] of Object.entries(properties)) {
+                            if ("tam_adi" in prop) {
+                                const propText = prop['tam_adi'];
+                                propsElement.textContent += propText;
+                                if (i < properties.length - 1) {
+                                    propsElement.textContent += ', '
+                                }
+                            }
+                        }
+                        definitionLi.append(propsElement, ' ');
+                    }
+                    definitionLi.append(definitionText);
+                    ol.appendChild(definitionLi);
+
+                    let examples = definition['orneklerListe'];
+                    if (!examples) {
+                        examples = [];
+                    }
+                    for (const example of examples) {
+                        if (example['ornek']) {
+                            const exampleElement = document.createElement("span");
+                            exampleElement.classList.add("trdict-example");
+                            exampleElement.textContent = example['ornek'];
+                            ol.append('"', exampleElement, '"');
+                        }
+                    }
+                }
+                entryLi.appendChild(dl);
+                entryList.appendChild(entryLi);
+            }
+            outputElement.appendChild(entryList);
+        }
+
+        async function queryWord(word) {
+            const response = await fetch(`https://sozluk.gov.tr/gts?ara=${word}`);
+            const json = await response.json();
+            console.log(json);
+            return json;
+        }
+        async function lookupWord() {
+            const search = getSearch();
+            if (!search) return;
+            const result = await queryWord(search);
+            showResponse(result);
+        }
+
+        lookupWord();
+    </script>
+</body>
+
+</html>
