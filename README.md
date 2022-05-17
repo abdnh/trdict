@@ -19,4 +19,4 @@ Also see my other projects related to Turkish:
 ## Notes
 
 [1]: GoldenDict is too ancient to support relatively modern JavaScript. I had a go at using Babel to transpile the website
-to something that can be understood by GoldenDict, but I had no success so far.
+to something that can be understood by GoldenDict, but I had no success so far. I ended up converting the dictionary data to the DICT format and using it with GoldenDict; see [tdk2dict](https://github.com/abdnh/tdk2dict/).
